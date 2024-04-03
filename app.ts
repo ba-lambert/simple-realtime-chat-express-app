@@ -23,8 +23,15 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/yourdb', 
   // useUnifiedTopology: true,
 });
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
   console.log('user connected', socket.id);
+
+  try {
+    const messages = await Message.find();
+    socket.emit('load messages', messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
 
   socket.on('chat message', (data) => {
     console.log('Received message:', data);
