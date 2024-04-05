@@ -17,6 +17,64 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // Function to fetch JWT token from localStorage
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        const socket = io({
+            query: {
+                token: getToken() // Send token as a query parameter when connecting to socket
+            }
+        });
+
+        socket.on('load messages', (messages) => {
+            const messagesDiv = document.getElementById('messages');
+            messages.forEach((message) => {
+                messagesDiv.innerHTML += `<p><strong>${message.user}:</strong> ${message.text}</p>`;
+            });
+        });
+
+        document.getElementById('chat-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const userInput = document.getElementById('message-input').value;
+
+            // Fetch token from localStorage
+            const token = getToken();
+
+            // Emit chat message along with token
+            socket.emit('chat message', { message: userInput, token });
+            document.getElementById('message-input').value = ''; 
+        });
+
+        socket.on('chat message', (data) => {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<p><strong>${data.user}:</strong> ${data.message}</p>`;
+        });
+    </script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+    </style>
+</head>
+<body>
+    <div id="messages"></div>
+
+    <form id="chat-form">
+        <input type="text" id="message-input" placeholder="Enter your message">
+        <button type="submit">Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
         const socket = io();
         socket.on('load messages', (messages) => {
             const messagesDiv = document.getElementById('messages');
@@ -27,7 +85,7 @@
         document.getElementById('chat-form').addEventListener('submit', (event) => {
             event.preventDefault();
             const userInput = document.getElementById('message-input').value;
-            socket.emit('chat message', { user: 'User', message: userInput });
+            socket.emit('chat message', { user: token, message: userInput });
             document.getElementById('message-input').value = ''; 
         });
         socket.on('chat message', (data) => {
@@ -36,4 +94,4 @@
         });
     </script>
 </body>
-</html>
+</html> -->
