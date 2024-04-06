@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { Server as SocketIOServer } from "socket.io";
 import http from "http";
-import Message from "./model/messages.model";
+import Message from "./model/messages.mode";
 import cors from 'cors';
 import path from "path";
 import { signup, login } from "./controllers/user.controller";
@@ -26,10 +26,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/yourdb', 
 });
 
 io.use(async (socket, next) => {
-  const token = socket.handshake.query.token;
+  const token:any = socket.handshake.query.token;
   try {
     const decodedToken = jwt.verify(token, 'secretKey');
-    socket.userId = (decodedToken as any).userId;
+    (socket as any).userId = (decodedToken as any).userId;
     next();
   } catch (error) {
     console.error('Error verifying token:', error);
@@ -49,9 +49,9 @@ io.on('connection', async (socket) => {
 
   socket.on('chat message', async (data) => {
     try {
-      const message = new Message({ user: socket.userId, text: data.message });
+      const message = new Message({ user: (socket as any).userId, text: data.message });
       await message.save();
-      io.emit('chat message', { user: socket.userId, message: data.message });
+      io.emit('chat message', { user: (socket as any).userId, message: data.message });
     } catch (error) {
       console.error('Error saving message:', error);
     }
